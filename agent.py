@@ -10,9 +10,7 @@ groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
     model="qwen/qwen3-32b",
-    temperature=0,
-    groq_key=groq_key
-                      
+    temperature=0,                
 )
  
 def safe_get_distance(input_text):

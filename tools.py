@@ -69,7 +69,7 @@ def estimate_time_by_mode(distance_km,duration_min):
 
     # Average realistic speeds in India
     bus=42
-    train=70
+    train=60
     flight=830
 
     airport_overhead=50 #minutes

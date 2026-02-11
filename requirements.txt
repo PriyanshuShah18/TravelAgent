@@ -1,0 +1,8 @@
+streamlit
+fastapi
+langchain
+langchain-groq
+python-dotenv
+requests
+pytesseract
+pillow

@@ -4,7 +4,6 @@ from langchain.agents import initialize_agent, Tool
 from langchain.agents.agent_types import AgentType
 from langchain.memory import ConversationBufferMemory
 import traceback
-import os
 import streamlit as st
 
 groq_key=st.secrets["GROQ_API_KEY"]
@@ -12,7 +11,8 @@ groq_key=st.secrets["GROQ_API_KEY"]
 llm= ChatGroq(
     model="qwen/qwen3-32b",
     temperature=0,
-    groq_api_key=groq_key
+    groq_key=groq_key
+                      
 )
  
 def safe_get_distance(input_text):
@@ -90,7 +90,7 @@ agent= initialize_agent(
 def travel_agent(travel_data):
     source=travel_data["source"]
     destination=travel_data["destination"]
-    budget= travel_data["bufget"]
+    budget= travel_data["budget"]
     priority= travel_data["priority"]
 
     query= f"""

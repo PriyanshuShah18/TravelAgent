@@ -1,6 +1,6 @@
 import streamlit as st
 from agent import travel_agent
-from ocr import extract_text_from_ticket
+#from ocr import extract_text_from_ticket
 
 #st.write("App started")
 st.title("AI Travel Recommendation Agent")
@@ -11,10 +11,10 @@ st.title("AI Travel Recommendation Agent")
     #text= st.text_area("Enter travel request")
 
 #elif input_type=="Ticket Image":
-image = st.file_uploader("Upload Ticket")
+'''image = st.file_uploader("Upload Ticket")
 if image:
     text= extract_text_from_ticket(image)
-    st.write("Extracted text:",text)
+    st.write("Extracted text:",text)'''
 # Travel inputs
 
 st.subheader("Travel Details")

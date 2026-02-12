@@ -120,12 +120,12 @@ def extract_travel_detials(user_query):
         raise Exception("Could not extract travel details.")
 
 def travel_agent(user_query,budget,priority):
-    details: extract_travel_details(user_query)
+    details=extract_travel_details(user_query)
 
     source= details["source"]
     destination = details["destination"]
     start_date = details["start_date"]
-    end_date = details("end_date")
+    end_date = details.get("end_date")
     
     trip_type= "round" if end_date else "oneway"
 

@@ -89,7 +89,7 @@ agent= initialize_agent(
 
 # MAIN FUNCTION
 
-def extract_travel_detials(user_query):
+def extract_travel_details(user_query):
     extraction_prompt= f"""
     Extract the following details from the user query:
 
@@ -103,7 +103,7 @@ def extract_travel_detials(user_query):
         "source":"...",
         "destination":"...",
         "start_date":"YYYY-MM-DD",
-        "end_date":"YYYY-MM-DD or null",
+        "end_date":"YYYY-MM-DD or null"
     }}
 
     Query:
@@ -129,15 +129,31 @@ def travel_agent(user_query,budget,priority):
     
     trip_type= "round" if end_date else "oneway"
 
-    travel_data={
-        "source":source,
-        "destination":destination,
-        "start_date":start_date,
-        "end_date":end_date,
-        "trip_type":trip_type,
-        "budget":budget,
-        "priority":priority
-    }
+    query= f"""
+    Plan the best travel option.
 
-    return travel_agent(travel_data)
+    
+    "Source": {source},
+    "Destination": {destination},
+    "Starting Date": {start_date},
+    "Trip Type": {trip_type},
+    "Return Date": {end_date if end_date else "Not Applicable"},
+
+    "Budget": {budget},
+    "Priority": {priority}
+    
+    If round trip:
+    - Consider return journey cost.
+    - Calculate total travel cost.
+
+    Important:
+    1. Use GetDistance Tool.
+    2. Use EstimateTime Tool.
+    3. Use EstimateCost tool.
+    4. Choose best option.
+    5. Explain clearly.
+    """
+    response = agent.run(query)
+
+    return response
   

@@ -39,13 +39,13 @@ if st.button("Get Recommendation"):
         st.error("Please enter both source and destination")
         st.stop()
 
-    if isinstance(date_input, tuple):
+    if isinstance(date_range, tuple):
         # Round trip
-        start_date, end_date= date_input
+        start_date, end_date= date_range
         trip_type= "round"
     else:
         # One way
-        start_date= date_input
+        start_date= date_range
         end_date= None
         trip_type= "oneway"
 

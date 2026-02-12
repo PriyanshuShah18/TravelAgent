@@ -6,7 +6,7 @@ from langchain.memory import ConversationBufferMemory
 import traceback
 import streamlit as st
 
-groq_key=st.secrets["GROQ_API_KEY"]
+#groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
     model="qwen/qwen3-32b",
@@ -27,11 +27,12 @@ def safe_get_distance(input_text):
 
 def safe_estimate_cost(input_text):
     """
-    Input format: distance_km
+    Input format: distance_km,start_date
     """
     try:
-        distance= float(input_text)
-        result= estimate_cost(distance)
+        distance_km,start_date= input_text.split(",")
+        distance= float(distance_km.strip())
+        result= estimate_cost(distance_km, start_date.strip())
         return str(result)
     except Exception as e:
         return f"Cost tool failed. Error: {str(e)}"
@@ -59,7 +60,7 @@ tools=[
     Tool(
         name="EstimateCost",
         func=safe_estimate_cost,
-        description="Use this to estimate cost for bus,train and flight.Input : distance_km"
+        description="Use this to estimate cost for bus,train and flight.Input : distance_km,start_date"
 
     ),
     Tool(
@@ -90,19 +91,24 @@ def travel_agent(travel_data):
     destination=travel_data["destination"]
     budget= travel_data["budget"]
     priority= travel_data["priority"]
+    start_date= travel_data["start_date"]
+    end_date= travel_data["end_date"]
 
     query= f"""
     Plan the best travel option.
 
     Source: {source}
     Destination: {destination}
+    Travel Start Date: {start_date}
+    Travel End Date: {end_date}
     Budget: {budget}
     Priority: {priority}
 
-    Steps:
-    1. Get distance using GetDistancetool.
-    2. Estimate cost using EstimateCost.
-    3. Estimate time using Estimation.
+
+    Important:
+    1. Consider travel date while estimating cost.
+    2. Weekend or near-term bookings may affect pricing.
+    3. Use tools to calculate distance, time and cost.
     4. Choose best option based on priority and budget.
     5. Explain clearly.
     """

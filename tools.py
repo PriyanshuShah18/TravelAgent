@@ -1,5 +1,5 @@
 import requests
-
+from datetime import datetime
 
 # FREE GEOCODING USING OPENSTREETMAP
 
@@ -88,7 +88,7 @@ def estimate_time_by_mode(distance_km,duration_min):
 
 # COST ESTIMATION (BUSINESS LOGIC)
 
-def estimate_cost(distance_km):
+def estimate_cost(distance_km,start_date):
     """
     Dynamically estimates cost based on distance.
     """
@@ -124,10 +124,29 @@ def estimate_cost(distance_km):
     
     flight_cost= max(base_fare,distance_km*flight_rate)
 
+    # Date Based Demand
+
+    travel_date= datetime.strptime(start_date,"%Y-%m-%d")
+    today= datetime.today()
+    days_until_travel= (travel_date-today).days
+
+    demand_factor= 1.0
+
+    # Near departure -> Price surge
+
+    if days_until_travel<7:
+        demand_factor += 0.25
+    elif days_until_travel<15:
+        demand_factor += 0.15
+
+    if travel_date.weekday() >= 5:
+        demand_factor += 0.10
+
+
     return {
-        "bus": round(bus_cost,0),
-        "train": round(train_cost,0),
-        "flight": round(flight_cost,0)
+        "bus": round(bus_cost*demand_factor,0),
+        "train": round(train_cost* demand_factor,0),
+        "flight": round(flight_cost* demand_factor,0)
     }
 
 

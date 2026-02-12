@@ -6,7 +6,7 @@ from langchain.memory import ConversationBufferMemory
 import traceback
 import streamlit as st
 
-#groq_key=st.secrets["GROQ_API_KEY"]
+groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
     model="qwen/qwen3-32b",

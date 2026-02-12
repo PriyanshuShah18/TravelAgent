@@ -1,5 +1,6 @@
 import streamlit as st
 from agent import travel_agent
+from datetime import date
 #from ocr import extract_text_from_ticket
 
 #st.write("App started")
@@ -21,20 +22,36 @@ st.subheader("Travel Details")
 source= st.text_input("From (Source City)")
 destination= st.text_input("To (Destination City)")
 
+date_range= st.date_input(
+    "Select Travel Dates",
+    value=(date.today(), date.today()),
+    min_value= date.today()
+    )
+
 budget= st.number_input("Budget (INR)", min_value=500)
 priority= st.selectbox("Priority",["time","budget"])
+
+
 
 if st.button("Get Recommendation"):
 
     if not source or not destination:
         st.error("Please enter both source and destination")
-    else:
-        travel_data={
-            "source":source,
-            "destination":destination,
-            "budget":budget,
-            "priority": priority
-        }
+        st.stop()
+
+    if len(date_range) != 2:
+        st.error("Please select both start and end date.")
+        st.stop()
+
+    start_date, end_date= date_range
+    travel_data={
+        "source":source,
+        "destination":destination,
+        "start_date": str(start_date),
+        "end_date": str(end_date),
+        "budget":budget,
+        "priority": priority
+    }
 
 
     result= travel_agent(travel_data)

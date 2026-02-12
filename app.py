@@ -54,7 +54,7 @@ if st.button("Get Recommendation"):
         start_date= date_range
         end_date= None
         trip_type= "oneway"
-    
+
         travel_data={
             "source": source,
             "destination": destination,
@@ -65,5 +65,5 @@ if st.button("Get Recommendation"):
             "priority": priority
         }
 
-    result= travel_agent(travel_data)
-    st.success(result)
+        result= travel_agent(travel_data)
+        st.success(result)

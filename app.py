@@ -11,10 +11,10 @@ st.title("AI Travel Recommendation Agent")
     #text= st.text_area("Enter travel request")
 
 #elif input_type=="Ticket Image":
-'''image = st.file_uploader("Upload Ticket")
-if image:
-    text= extract_text_from_ticket(image)
-    st.write("Extracted text:",text)'''
+#image = st.file_uploader("Upload Ticket")
+#if image:
+#    text= extract_text_from_ticket(image)
+#    st.write("Extracted text:",text)
 # Travel inputs
 
 st.subheader("Travel Details")

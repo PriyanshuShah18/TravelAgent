@@ -42,7 +42,7 @@ if st.button("Get Recommendation"):
     if isinstance(date_range, tuple):
         if len(date_range)==2:
             # Round trip
-            start_date= date_range[0],
+            start_date= date_range[0]
             end_date= date_range[1]
             trip_type= "round"
         else:
@@ -55,15 +55,15 @@ if st.button("Get Recommendation"):
         end_date= None
         trip_type= "oneway"
 
-        travel_data={
-            "source": source,
-            "destination": destination,
-            "start_date": str(start_date),
-            "end_date": str(end_date) if end_date else None,
-            "trip_type": trip_type,
-            "budget": budget,
-            "priority": priority
+    travel_data={
+        "source": source,
+        "destination": destination,
+        "start_date": str(start_date),
+        "end_date": str(end_date) if end_date else None,
+        "trip_type": trip_type,
+        "budget": budget,
+        "priority": priority
         }
 
-        result= travel_agent(travel_data)
-        st.success(result)
+    result= travel_agent(travel_data)
+    st.success(result)

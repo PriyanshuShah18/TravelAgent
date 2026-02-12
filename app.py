@@ -23,7 +23,7 @@ source= st.text_input("From (Source City)")
 destination= st.text_input("To (Destination City)")
 
 date_range= st.date_input(
-    "Select Travel Dates",
+    "Select Travel Date(s)",
     value=(date.today(), date.today()),
     min_value= date.today()
     )
@@ -39,20 +39,25 @@ if st.button("Get Recommendation"):
         st.error("Please enter both source and destination")
         st.stop()
 
-    if len(date_range) != 2:
-        st.error("Please select both start and end date.")
-        st.stop()
+    if isinstance(date_input, tuple):
+        # Round trip
+        start_date, end_date= date_input
+        trip_type= "round"
+    else:
+        # One way
+        start_date= date_input
+        end_date= None
+        trip_type= "oneway"
 
-    start_date, end_date= date_range
-    travel_data={
-        "source":source,
-        "destination":destination,
-        "start_date": str(start_date),
-        "end_date": str(end_date),
-        "budget":budget,
-        "priority": priority
-    }
-
+        travel_data={
+            "source": source,
+            "destination": destination,
+            "start_date": str(start_date),
+            "end_date": str(end_date) if end_date else None,
+            "trip_type": trip_type,
+            "budget": budget,
+            "priority": priority
+        }
 
     result= travel_agent(travel_data)
     st.success(result)

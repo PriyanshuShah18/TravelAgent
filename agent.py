@@ -92,7 +92,8 @@ def travel_agent(travel_data):
     budget= travel_data["budget"]
     priority= travel_data["priority"]
     start_date= travel_data["start_date"]
-    end_date= travel_data["end_date"]
+    end_date= travel_data("end_date")
+    trip_type= travel_data.get("trip_type")
 
     query= f"""
     Plan the best travel option.
@@ -100,9 +101,15 @@ def travel_agent(travel_data):
     Source: {source}
     Destination: {destination}
     Travel Start Date: {start_date}
-    Travel End Date: {end_date}
+    Trip Type: {trip_type}
+    Return Date: {end_date if end_date else "Not Applicable"}
+    
     Budget: {budget}
     Priority: {priority}
+
+    If round trip:
+    - Consider return journey cost.
+    - Calculate total travel cost.
 
 
     Important:

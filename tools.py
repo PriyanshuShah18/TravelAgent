@@ -88,7 +88,7 @@ def estimate_time_by_mode(distance_km,duration_min):
 
 # COST ESTIMATION (BUSINESS LOGIC)
 
-def estimate_cost(distance_km,start_date):
+def estimate_cost(distance_km,start_date,trip_type="oneway"):
     """
     Dynamically estimates cost based on distance.
     """
@@ -149,6 +149,10 @@ def estimate_cost(distance_km,start_date):
         "flight": round(flight_cost* demand_factor,0)
     }
 
+    if trip_type== "round":
+        costs= {mode: price * 2 for mode, price in costs.items()}
+    
+    return costs
 
 
 '''

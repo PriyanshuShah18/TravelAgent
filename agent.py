@@ -5,6 +5,9 @@ from langchain.agents.agent_types import AgentType
 from langchain.memory import ConversationBufferMemory
 import traceback
 import streamlit as st
+import json
+import re
+
 
 groq_key=st.secrets["GROQ_API_KEY"]
 
@@ -31,7 +34,7 @@ def safe_estimate_cost(input_text):
     """
     try:
         distance_km,start_date= input_text.split(",")
-        distance= float(distance_km.strip())
+        distance_km= float(distance_km.strip())
         result= estimate_cost(distance_km, start_date.strip())
         return str(result)
     except Exception as e:
@@ -86,40 +89,55 @@ agent= initialize_agent(
 
 # MAIN FUNCTION
 
-def travel_agent(travel_data):
-    source=travel_data["source"]
-    destination=travel_data["destination"]
-    budget= travel_data["budget"]
-    priority= travel_data["priority"]
-    start_date= travel_data["start_date"]
-    end_date= travel_data.get("end_date")
-    trip_type= travel_data.get("trip_type")
+def extract_travel_detials(user_query):
+    extraction_prompt= f"""
+    Extract the following details from the user query:
 
-    query= f"""
-    Plan the best travel option.
+    - Source city
+    - Destination City
+    - Start Date (convert to YYYY-MM-DD format)
+    - End Date (if mentioned,otherwise null)
 
-    Source: {source}
-    Destination: {destination}
-    Travel Start Date: {start_date}
-    Trip Type: {trip_type}
-    Return Date: {end_date if end_date else "Not Applicable"}
-    
-    Budget: {budget}
-    Priority: {priority}
+    Return ONLY valid JSON like:
+    {{
+        "source":"...",
+        "destination":"...",
+        "start_date":"YYYY-MM-DD",
+        "end_date":"YYYY-MM-DD or null",
+    }}
 
-    If round trip:
-    - Consider return journey cost.
-    - Calculate total travel cost.
-
-
-    Important:
-    1. Consider travel date while estimating cost.
-    2. Weekend or near-term bookings may affect pricing.
-    3. Use tools to calculate distance, time and cost.
-    4. Choose best option based on priority and budget.
-    5. Explain clearly.
+    Query:
+    {user_query}
     """
 
-    response= agent.run(query)
+    response= llm.invoke(extraction_prompt)
+    text= response.content
 
-    return response
+    json_match = re.search(r"\{.*\}",text,re.DOTALL)
+    if json_match:
+        return json.loads(json_match.group())
+    else:
+        raise Exception("Could not extract travel details.")
+
+def travel_agent(user_query,budget,priority):
+    details: extract_travel_details(user_query)
+
+    source= details["source"]
+    destination = details["destination"]
+    start_date = details["start_date"]
+    end_date = details("end_date")
+    
+    trip_type= "round" if end_date else "oneway"
+
+    travel_data={
+        "source":source,
+        "destination":destination,
+        "start_date":start_date,
+        "end_date":end_date,
+        "trip_type":trip_type,
+        "budget":budget,
+        "priority":priority
+    }
+
+    return travel_agent(travel_data)
+  

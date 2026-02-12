@@ -19,14 +19,19 @@ st.title("AI Travel Recommendation Agent")
 # Travel inputs
 
 st.subheader("Travel Details")
-source= st.text_input("From (Source City)")
-destination= st.text_input("To (Destination City)")
 
-date_range= st.date_input(
-    "Select Travel Date(s)",
-    value=(date.today(), date.today()),
-    min_value= date.today()
-    )
+user_query= st.text_area(
+    "Enter your travel plan",
+    placeholder="I want to go from Ahmedabad to Mumbai from 23rd February to 26th February"
+)
+#source= st.text_input("From (Source City)")
+#destination= st.text_input("To (Destination City)")
+
+#date_range= st.date_input(
+#    "Select Travel Date(s)",
+#    value=(date.today(), date.today()),
+#    min_value= date.today()
+#    )
 
 budget= st.number_input("Budget (INR)", min_value=500)
 priority= st.selectbox("Priority",["time","budget"])
@@ -34,36 +39,14 @@ priority= st.selectbox("Priority",["time","budget"])
 
 
 if st.button("Get Recommendation"):
-
-    if not source or not destination:
-        st.error("Please enter both source and destination")
+    if not user_query:
+        st.error("Please enter your travel plan.")
         st.stop()
-
-    if isinstance(date_range, tuple):
-        if len(date_range)==2:
-            # Round trip
-            start_date= date_range[0]
-            end_date= date_range[1]
-            trip_type= "round"
-        else:
-            # One way
-            start_date= date_range[0]
-            end_date= None
-            trip_type= "oneway"
-    else:
-        start_date= date_range
-        end_date= None
-        trip_type= "oneway"
-
-    travel_data={
-        "source": source,
-        "destination": destination,
-        "start_date": str(start_date),
-        "end_date": str(end_date) if end_date else None,
-        "trip_type": trip_type,
-        "budget": budget,
-        "priority": priority
-        }
-
-    result= travel_agent(travel_data)
+    
+    with st.spinner("Analyzing your trip and finding best options..."):
+        result= travel_agent(
+            user_query,
+            budget,
+            priority
+        )
     st.success(result)

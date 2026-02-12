@@ -92,7 +92,7 @@ def travel_agent(travel_data):
     budget= travel_data["budget"]
     priority= travel_data["priority"]
     start_date= travel_data["start_date"]
-    end_date= travel_data("end_date")
+    end_date= travel_data.get("end_date")
     trip_type= travel_data.get("trip_type")
 
     query= f"""

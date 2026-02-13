@@ -1,20 +1,32 @@
-from langchain_groq import ChatGroq
+from langchain_groq import ChatGroq # Groq LLM Wrapper
 from tools import get_distance,estimate_cost,estimate_time_by_mode
+
+
 from langchain.agents import initialize_agent, Tool
+# Tool wraps Python Functions so LLM can use them
+# initialize_agent builds the reasoning loop (Reason+Act: ReAct agent)
+
 from langchain.agents.agent_types import AgentType
+# Selecting reasoning strategy
+
 from langchain.memory import ConversationBufferMemory
-import traceback
-import streamlit as st
-import json
-import re
+# Agent remebers previous context.
+
+import traceback      # Debugging
+import streamlit as st  # access API key
+import json     # Parse structured LLM output
+import re       # Extract JSON via regex
 
 
 groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
     model="qwen/qwen3-32b",
-    temperature=0,                
+    temperature=0,        # Deterministic Reasoning        
+    groq_api_key=groq_key
 )
+ 
+# The original functions return dictionaries but LangChain tools must return strings
  
 def safe_get_distance(input_text):
     """
@@ -54,6 +66,8 @@ def safe_estimate_time(input_text):
 
 # DEFINE TOOLS FOR AGENT
 
+# Description is very important as the LLM reads this desc to decide which tool to call.
+# This is how tool selection works.
 tools=[
     Tool(
         name="GetDistance",
@@ -93,7 +107,7 @@ def extract_travel_details(user_query):
     extraction_prompt= f"""
     Extract the following details from the user query:
 
-    - Source city
+    - Source City
     - Destination City
     - Start Date (convert to YYYY-MM-DD format)
     - End Date (if mentioned,otherwise null)
@@ -115,7 +129,7 @@ def extract_travel_details(user_query):
 
     json_match = re.search(r"\{.*\}",text,re.DOTALL)
     if json_match:
-        return json.loads(json_match.group())
+        return json.loads(json_match.group()) # Converts JSON string into Python Dictionary.
     else:
         raise Exception("Could not extract travel details.")
 
@@ -131,8 +145,6 @@ def travel_agent(user_query,budget,priority):
 
     query= f"""
     Plan the best travel option.
-
-    
     "Source": {source},
     "Destination": {destination},
     "Starting Date": {start_date},

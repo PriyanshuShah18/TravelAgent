@@ -127,7 +127,7 @@ def extract_travel_details(user_query):
     response= llm.invoke(extraction_prompt)
     text= response.content
 
-    json_match = re.search(r"\{.*\}",text,re.DOTALL)
+    json_match = re.search(r"\{.*?\}",text,re.DOTALL)
     if json_match:
         return json.loads(json_match.group()) # Converts JSON string into Python Dictionary.
     else:

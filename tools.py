@@ -11,9 +11,9 @@ def geocode_place(place):
     url = "https://nominatim.openstreetmap.org/search"
 
     params = {
-        "q": place,
-        "format": "json",
-        "limit": 1
+        "q": place, # City Name
+        "format": "json",   # JSON Response
+        "limit": 1  # Only first Result.
     }
 
     headers = {
@@ -128,7 +128,7 @@ def estimate_cost(distance_km,start_date,trip_type="oneway"):
 
     travel_date= datetime.strptime(start_date,"%Y-%m-%d")
     today= datetime.today()
-    days_until_travel= (travel_date-today).days
+    days_until_travel= (travel_date-today).days     # Calculates booking window.
 
     demand_factor= 1.0
 
@@ -143,14 +143,16 @@ def estimate_cost(distance_km,start_date,trip_type="oneway"):
         demand_factor += 0.10
 
 
+    if trip_type== "round":
+        costs= {mode: price * 2 for mode, price in costs.items()}
+    
+
     return {
         "bus": round(bus_cost*demand_factor,0),
         "train": round(train_cost* demand_factor,0),
         "flight": round(flight_cost* demand_factor,0)
     }
 
-    if trip_type== "round":
-        costs= {mode: price * 2 for mode, price in costs.items()}
     
     return costs
 

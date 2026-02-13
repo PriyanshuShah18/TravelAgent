@@ -162,8 +162,9 @@ def travel_agent(user_query,budget,priority):
     1. Use GetDistance Tool.
     2. Use EstimateTime Tool.
     3. Use EstimateCost tool.
-    4. Choose best option.
-    5. Explain clearly.
+    4. Mention the distance between the Source and Destination.
+    5. Choose best option.
+    6. Explain clearly.
     """
     response = agent.run(query)
 

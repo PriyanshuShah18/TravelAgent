@@ -20,6 +20,7 @@ st.title("AI Travel Recommendation Agent")
 
 st.subheader("Travel Details")
 
+# Takes natural language input, stores in user_query and sends it to the agent.
 user_query= st.text_area(
     "Enter your travel plan",
     placeholder="I want to go from Ahmedabad to Mumbai from 23rd February to 26th February"

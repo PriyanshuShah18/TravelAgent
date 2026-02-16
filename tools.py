@@ -1,6 +1,9 @@
 import requests
 from datetime import datetime
 import os
+import re
+import statistics
+
 
 # FREE GEOCODING USING OPENSTREETMAP
 MAPPLS_API_KEY= os.getenv("MAPPLS_API_KEY")
@@ -32,32 +35,96 @@ def search_with_serper(query):
 
     return " ".join(snippets) if snippets else "No relevant results found."
  
+def get_live_fares(source,destination,start_date):
+    """
+    Uses Serper search to extract approximate live fares.
+    Returns dict of live fares if found.
+    """
+
+    if not SERPER_API_KEY:
+        return None
+    fares= {}
+
+    modes= ["flight","train","bus"]
+
+    for mode in modes:
+        try:
+            query= f"{source} to {destination} {mode} ticket price on {start_date} in INR"
+
+            search_text = search_with_serper(query)
+
+            # Extract prices from text
+            price_matches= re.findall(r"(?:₹|Rs\.?|INR)\s?(\d{3,6})",search_text)
+
+            if price_matches:
+                # Take first detected price
+                prices= [int(p) for p in price_matches]
+
+                # Remove unrealistic prices
+                prices= [p for p in price if 300 <= p <= 50000]
+
+                if prices:
+                    median_price= int(statistics.median(prices))
+                    fares[mode]= median_price
+        except Exception:
+            continue
+    return fares if fares else None
+
 def geocode_place(place):
     """
     Converts a city/place name into (longitude, latitude)
-    using OpenStreetMap Nominatim (FREE, no API key).
+    
+    Primary : Mappls Geocoding
+    Fallback : OpenStreetMap Nominatim (FREE, no API key).
     """
-    url = "https://nominatim.openstreetmap.org/search"
+    # MAPPLS Geocoding
+    if MAPPLS_API_KEY:
+        try:
+            url=f"https://apis.mappls.com/advancedmaps/v1/{MAPPLS_API_KEY}/geo_code"
 
-    params = {
-        "q": place, # City Name
-        "format": "json",   # JSON Response
-        "limit": 1  # Only first Result.
-    }
+            params= {
+                "address": place
+            }
 
-    headers = {
-        "User-Agent": "travel-ai-agent"  # REQUIRED by Nominatim usage policy
-    }
+            response= requests.get(url,params=params,timeout=10).json()
 
-    response = requests.get(url, params=params, headers=headers).json()
+            if "results" in response and len(response["results"])>0:
+                location= response["results"][0]
 
-    if not response:
-        raise Exception(f"Geocoding failed for {place}")
+                lat= float(location["lat"])
+                lon= float(location["lng"])
 
-    lon = float(response[0]["lon"])
-    lat = float(response[0]["lat"])
+                return lon,lat
+        except Exception as e:
+            print("Mappls failed, switching to OpenStreetMap fallback")
+            print(str(e))
+    
+    # OpenStreetMap Nominatim (FREE)
 
-    return lon, lat
+    try:
+        url = "https://nominatim.openstreetmap.org/search"
+
+        params = {
+            "q": place, # City Name
+            "format": "json",   # JSON Response
+            "limit": 1  # Only first Result.
+        }
+
+        headers = {
+            "User-Agent": "travel-ai-agent"  # REQUIRED by Nominatim usage policy
+        }
+
+        response = requests.get(url, params=params, headers=headers).json()
+
+        if not response:
+            raise Exception(f"Geocoding failed for {place}")
+
+        lon = float(response[0]["lon"])
+        lat = float(response[0]["lat"])
+
+        return lon, lat
+    except Exception as e:
+        raise Exception(f"All geocoding providers failed: {str(e)}")
 
 
 
@@ -66,28 +133,59 @@ def geocode_place(place):
 def get_distance(source, destination):
     """
     Returns real-time distance and duration between two places
-    using OSRM (Open Source Routing Machine).
+    Primary : Mappls
+    Fallback: OSRM (Open Source Routing Machine).
     """
 
-    src_lon, src_lat = geocode_place(source)
-    dst_lon, dst_lat = geocode_place(destination)
+    # MAPPLS
 
-    url = (
-        f"https://router.project-osrm.org/route/v1/driving/"
-        f"{src_lon},{src_lat};{dst_lon},{dst_lat}"
-    )
+    if MAPPLS_API_KEY:
+        try:
+            url=f"https://apis.mappls.com/advancedmaps/v1/{MAPPLS_API_KEY}/route"
+    
+            params={
+                "start": source,
+                "end": destination,
+                "profile": "driving"
+            }
 
-    response = requests.get(url).json()
+            response= requests.get(url,params=params, timeout=10).json()
 
-    if response.get("code") != "Ok":
-        raise Exception(f"Routing failed: {response}")
+            if "routes" in response and len(response["routes"])>0:
+                route= response["routes"][0]
 
-    route = response["routes"][0]
+                return{
+                    "distance_km": route["distance"]/1000,
+                    "duration_min":route["duration"]/60,
+                    "provider":"Mappls"
+                }
+        except Exception as e:
+            print("Mappls failed,switching to OSRM fallback")
+            print(str(e))
+    # OSRM Fallback
+    try:
+        src_lon,src_lat = geocode_place(source)
+        dst_lon,dst_lat= geocode_place(destination)
 
-    return {
-        "distance_km": route["distance"] / 1000,
-        "duration_min": route["duration"] / 60
-    }
+        url = (
+            f"https://router.project-osrm.org/route/v1/driving/"
+            f"{src_lon},{src_lat};{dst_lon},{dst_lat}"
+        )
+
+        response = requests.get(url,timeout=10).json()
+
+        if response.get("code") != "Ok":
+            raise Exception(f"Routing failed: {response}")
+
+        route = response["routes"][0]
+
+        return {
+            "distance_km": route["distance"] / 1000,
+            "duration_min": route["duration"] / 60,
+            "provider":"OSRM"
+        }
+    except Exception as e:
+        raise Exception(f"All routing providers failed: {str(e)}")
 
 # MODE-SPECIFIC TIME ESTIMATION
 
@@ -117,10 +215,14 @@ def estimate_time_by_mode(distance_km,duration_min):
 
 # COST ESTIMATION (BUSINESS LOGIC)
 
-def estimate_cost(distance_km,start_date,trip_type="oneway"):
+def estimate_cost(distance_km,start_date,trip_type="oneway",source=None,destination=None):
     """
     Dynamically estimates cost based on distance.
     """
+    live_fares=None
+    if source and destination:
+        live_fares= get_live_fares(source,destination,start_date)
+
     # BUS PRICING
     if distance_km <= 400:
         bus_rate= 2.8
@@ -171,17 +273,17 @@ def estimate_cost(distance_km,start_date,trip_type="oneway"):
     if travel_date.weekday() >= 5:
         demand_factor += 0.10
 
+    costs={
+        "bus": round(bus_cost*demand_factor,0),
+        "train": round(train_cost*demand_factor,0),
+        "flight": round(flight_cost*demand_factor,0)
+    }
+    if live_fares:
+        for mode in live_fares:
+            costs[mode]= live_fares[mode]
 
     if trip_type== "round":
         costs= {mode: price * 2 for mode, price in costs.items()}
-    
-
-    return {
-        "bus": round(bus_cost*demand_factor,0),
-        "train": round(train_cost* demand_factor,0),
-        "flight": round(flight_cost* demand_factor,0)
-    }
-
     
     return costs
 

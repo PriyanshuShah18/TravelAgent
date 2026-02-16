@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 # FREE GEOCODING USING OPENSTREETMAP
-
+MAPPLS_API_KEY= os.getenv("MAPPLS_API_KEY")
 SERPER_API_KEY= os.getenv("SERPER_API_KEY")
 
 def search_with_serper(query):

@@ -4,8 +4,6 @@ import os
 import re
 import statistics
 
-
-# FREE GEOCODING USING OPENSTREETMAP
 MAPPLS_API_KEY= os.getenv("MAPPLS_API_KEY")
 SERPER_API_KEY= os.getenv("SERPER_API_KEY")
 
@@ -127,8 +125,6 @@ def geocode_place(place):
         raise Exception(f"All geocoding providers failed: {str(e)}")
 
 
-
-# FREE ROUTING USING OSRM PUBLIC SERVER
 
 def get_distance(source, destination):
     """

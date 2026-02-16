@@ -34,10 +34,8 @@ user_query= st.text_area(
 #    min_value= date.today()
 #    )
 
-budget= st.number_input("Budget (INR)", min_value=500)
+budget= st.number_input("Budget(INR)", min_value=500)
 priority= st.selectbox("Priority",["time","budget"])
-
-
 
 if st.button("Get Recommendation"):
     if not user_query:

@@ -17,7 +17,6 @@ import streamlit as st  # access API key
 import json     # Parse structured LLM output
 import re       # Extract JSON via regex
 
-
 groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
@@ -34,6 +33,7 @@ def safe_search(input_text):
     except Exception as e:
         return f"Search failed: {str(e)}"
 
+
 def safe_get_distance(input_text):
     """
     Input format: 'source,destination'
@@ -44,7 +44,6 @@ def safe_get_distance(input_text):
         return str(result)
     except Exception as e:
         return f"Distance tool failed.Error: {str(e)}"
-
 
 def safe_estimate_cost(input_text):
     """
@@ -181,7 +180,7 @@ def travel_agent(user_query,budget,priority):
     - Strikes
     5. Adjust recommendation accordingly.
     6. Mention the distance between the Source and Destination.
-    7. Do NOT menion WebSearch in the final output.
+    7. Do NOT mention WebSearch in the final output.
     8. Choose best option.
     9. Explain clearly.
     """

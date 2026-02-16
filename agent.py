@@ -1,5 +1,5 @@
 from langchain_groq import ChatGroq # Groq LLM Wrapper
-from tools import get_distance,estimate_cost,estimate_time_by_mode
+from tools import get_distance,estimate_cost,estimate_time_by_mode,search_with_serper
 
 
 from langchain.agents import initialize_agent, Tool
@@ -27,7 +27,13 @@ llm= ChatGroq(
 )
  
 # The original functions return dictionaries but LangChain tools must return strings
- 
+
+def safe_search(input_text):
+    try:
+        return search_with_serper(input_text)
+    except Exception as e:
+        return f"Search failed: {str(e)}"
+
 def safe_get_distance(input_text):
     """
     Input format: 'source,destination'
@@ -84,6 +90,11 @@ tools=[
         name="EstimateTime",
         func=safe_estimate_time,
         description="Use this to estimate travel time per mode.Input: distance_km,duration_min"
+    ),
+    Tool(
+        name="WebSearch",
+        func=safe_search,
+        description="Use this to search live travel conditions,disruptions,events or surge information."
     )
 ]
 
@@ -162,9 +173,15 @@ def travel_agent(user_query,budget,priority):
     1. Use GetDistance Tool.
     2. Use EstimateTime Tool.
     3. Use EstimateCost tool.
-    4. Mention the distance between the Source and Destination.
-    5. Choose best option.
-    6. Explain clearly.
+    4. Use WebSearch Tool to check:
+    - Travel disruptions
+    - Event-based surge
+    - Weather
+    - Strikes
+    5. Adjust recommendation accordingly.
+    6. Mention the distance between the Source and Destination.
+    7. Choose best option.
+    8. Explain clearly.
     """
     response = agent.run(query)
 

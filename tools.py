@@ -1,8 +1,37 @@
 import requests
 from datetime import datetime
+import os
 
 # FREE GEOCODING USING OPENSTREETMAP
 
+SERPER_API_KEY= os.getenv("SERPER_API_KEY")
+
+def search_with_serper(query):
+    """
+    Uses Google Serper API to fetch real-time web results.
+    Returns top snippets.
+    """
+    url = "https://google.serper.dev/search"
+
+    headers ={
+        "X-API-KEY": SERPER_API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    payload={
+        "q": query
+    }
+
+    response= requests.post(url,json=payload,headers=headers).json()
+
+    snippets =[]
+
+    if "organic" in response:
+        for result in response["organic"][:3]:
+            snippets.append(result.get("snippet",""))
+
+    return " ".join(snippets) if snippets else "No relevant results found."
+ 
 def geocode_place(place):
     """
     Converts a city/place name into (longitude, latitude)

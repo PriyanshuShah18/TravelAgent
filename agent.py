@@ -109,7 +109,8 @@ agent= initialize_agent(
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     memory=memory,
-    handle_parsing_errors=True
+    handle_parsing_errors=True,
+    return_intermediate_steps= False
 )
 
 # MAIN FUNCTION
@@ -180,8 +181,9 @@ def travel_agent(user_query,budget,priority):
     - Strikes
     5. Adjust recommendation accordingly.
     6. Mention the distance between the Source and Destination.
-    7. Choose best option.
-    8. Explain clearly.
+    7. Do NOT menion WebSearch in the final output.
+    8. Choose best option.
+    9. Explain clearly.
     """
     response = agent.run(query)
 

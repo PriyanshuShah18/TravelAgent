@@ -171,6 +171,11 @@ def get_distance(source, destination):
 
             response= requests.get(url,params=params, timeout=10)
 
+            print("Mappls Status:", response.status_code)
+            print("Mappls Response:",response.text)
+
+            return response.json()
+
             if response.status_code == 200:
                 data= response.json()
 

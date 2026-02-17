@@ -120,15 +120,15 @@ def extract_travel_details(user_query):
 
     - Source City
     - Destination City
-    - Start Date (convert to YYYY-MM-DD format)
+    - Start Date (convert to DD-MM-YYYY format, ASSUME YYYY as 2026 if not mentioned explicitly.)
     - End Date (if mentioned,otherwise null)
 
     Return ONLY valid JSON like:
     {{
         "source":"...",
         "destination":"...",
-        "start_date":"YYYY-MM-DD",
-        "end_date":"YYYY-MM-DD or null"
+        "start_date":"DD-MM-YYYY",
+        "end_date":"DD-MM-YYYY or null"
     }}
 
     Query:

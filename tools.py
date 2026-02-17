@@ -23,7 +23,12 @@ def search_with_serper(query):
         "q": query
     }
 
-    response= requests.post(url,json=payload,headers=headers).json()
+    response= requests.post(url,json=payload,headers=headers,timeout=10)
+
+    if response.status_code != 200:
+        return ""
+    
+    response= response.json()
 
     snippets =[]
 
@@ -41,13 +46,20 @@ def get_live_fares(source,destination,start_date):
 
     if not SERPER_API_KEY:
         return None
+    
+    try:
+        formatted_date= datetime.strptime(start_date,"%Y-%m-%d").strftime("%d %B %Y")
+    except:
+        formatted_date= start_date
+
+
     fares= {}
 
     modes= ["flight","train","bus"]
 
     for mode in modes:
         try:
-            query= f"{source} to {destination} {mode} ticket price on {start_date} in INR"
+            query= f"{source} to {destination} {mode} ticket price on {formatted_date} in INR"
 
             search_text = search_with_serper(query)
 
@@ -59,7 +71,7 @@ def get_live_fares(source,destination,start_date):
                 prices= [int(p) for p in price_matches]
 
                 # Remove unrealistic prices
-                prices= [p for p in price if 300 <= p <= 50000]
+                prices= [p for p in prices if 300 <= p <= 50000]
 
                 if prices:
                     median_price= int(statistics.median(prices))
@@ -78,24 +90,31 @@ def geocode_place(place):
     # MAPPLS Geocoding
     if MAPPLS_API_KEY:
         try:
-            url=f"https://apis.mappls.com/advancedmaps/v1/{MAPPLS_API_KEY}/geo_code"
+            url=f"https://apis.mappls.com/advancedmaps/v1/{MAPPLS_API_KEY}/place/geocode"
 
             params= {
                 "address": place
             }
 
-            response= requests.get(url,params=params,timeout=10).json()
+            response= requests.get(url,params=params,timeout=10)
 
-            if "results" in response and len(response["results"])>0:
-                location= response["results"][0]
+            if response.status_code== 200:
+                data= response.json()
 
-                lat= float(location["lat"])
-                lon= float(location["lng"])
+                if data.get("copResults") and len(data["copResults"]) > 0:
+                    location= data["copResults"][0]
 
-                return lon,lat
+
+                    lat= float(location["latitude"])
+                    lon=float(location["longitude"])
+                    
+
+                    return lon,lat
         except Exception as e:
-            print("Mappls failed, switching to OpenStreetMap fallback")
+            print("Mappls failed, fallback")
             print(str(e))
+
+             
     
     # OpenStreetMap Nominatim (FREE)
 
@@ -134,35 +153,40 @@ def get_distance(source, destination):
     """
 
     # MAPPLS
-
+    try:
+        src_lon,src_lat = geocode_place(source)
+        dst_lon, dst_lat = geocode_place(destination)
+    except Exception as e:
+        raise Exception(f"Geocoding failed : {str(e)}")
+    
     if MAPPLS_API_KEY:
         try:
             url=f"https://apis.mappls.com/advancedmaps/v1/{MAPPLS_API_KEY}/route"
     
             params={
-                "start": source,
-                "end": destination,
+                "start": f"{src_lat},{src_lon}",
+                "end": f"{dst_lat},{dst_lon}",
                 "profile": "driving"
             }
 
-            response= requests.get(url,params=params, timeout=10).json()
+            response= requests.get(url,params=params, timeout=10)
 
-            if "routes" in response and len(response["routes"])>0:
-                route= response["routes"][0]
+            if response.status_code == 200:
+                data= response.json()
 
-                return{
-                    "distance_km": route["distance"]/1000,
-                    "duration_min":route["duration"]/60,
-                    "provider":"Mappls"
-                }
+                if data.get("routes"):
+                    route = data["routes"][0]
+
+                    return{
+                        "distance_km": route["distance"]/1000,
+                        "duration_min":route["duration"]/60,
+                        "provider":"Mappls"
+                    }
         except Exception as e:
             print("Mappls failed,switching to OSRM fallback")
             print(str(e))
     # OSRM Fallback
     try:
-        src_lon,src_lat = geocode_place(source)
-        dst_lon,dst_lat= geocode_place(destination)
-
         url = (
             f"https://router.project-osrm.org/route/v1/driving/"
             f"{src_lon},{src_lat};{dst_lon},{dst_lat}"
@@ -252,8 +276,10 @@ def estimate_cost(distance_km,start_date,trip_type="oneway",source=None,destinat
     flight_cost= max(base_fare,distance_km*flight_rate)
 
     # Date Based Demand
-
-    travel_date= datetime.strptime(start_date,"%Y-%m-%d")
+    try:
+        travel_date= datetime.strptime(start_date,"%Y-%m-%d")
+    except:
+        travel_date= datetime.today()
     today= datetime.today()
     days_until_travel= (travel_date-today).days     # Calculates booking window.
 

@@ -47,12 +47,27 @@ def safe_get_distance(input_text):
 
 def safe_estimate_cost(input_text):
     """
-    Input format: distance_km,start_date
+    Input format: distance_km,start_date,source,destination,trip_type
     """
     try:
-        distance_km,start_date= input_text.split(",")
-        distance_km= float(distance_km.strip())
-        result= estimate_cost(distance_km, start_date.strip())
+        parts = [p.strip() for p in input_text.split(",")]
+
+        if len(parts) != 5:
+            return "Cost tool failed. Incorrect input format."
+
+        distance_km= float(parts[0])
+        start_date= parts[1]
+        source= parts[2]
+        destination= parts[3]
+        trip_type= parts[4]
+        
+        result= estimate_cost(
+            distance_km,
+            start_date,
+            trip_type=trip_type,
+            source= source,
+            destination=destination
+            )
         return str(result)
     except Exception as e:
         return f"Cost tool failed. Error: {str(e)}"
@@ -82,7 +97,7 @@ tools=[
     Tool(
         name="EstimateCost",
         func=safe_estimate_cost,
-        description="Use this to estimate cost for bus,train and flight.Input : distance_km,start_date"
+        description="Use this to estimate cost for bus,train and flight.Input : distance_km,start_date,source,destination,trip_type"
 
     ),
     Tool(
@@ -120,15 +135,15 @@ def extract_travel_details(user_query):
 
     - Source City
     - Destination City
-    - Start Date (convert to DD-MM-YYYY format, ASSUME YYYY as 2026 if not mentioned explicitly.)
+    - Start Date (convert to YYYY-MM-DD format. ASSUME YYYY as 2026 if not mentioned explicitly.)
     - End Date (if mentioned,otherwise null)
 
     Return ONLY valid JSON like:
     {{
         "source":"...",
         "destination":"...",
-        "start_date":"DD-MM-YYYY",
-        "end_date":"DD-MM-YYYY or null"
+        "start_date":"YYYY-MM-DD",
+        "end_date":"YYYY-MM-DD or null"
     }}
 
     Query:
@@ -138,11 +153,14 @@ def extract_travel_details(user_query):
     response= llm.invoke(extraction_prompt)
     text= response.content
 
-    json_match = re.search(r"\{.*?\}",text,re.DOTALL)
-    if json_match:
-        return json.loads(json_match.group()) # Converts JSON string into Python Dictionary.
-    else:
-        raise Exception("Could not extract travel details.")
+    try:
+        return json.loads(text.strip())
+    except:
+        json_match = re.search(r"\{.*?\}",text,re.DOTALL)
+        if json_match:
+            return json.loads(json_match.group()) # Converts JSON string into Python Dictionary.
+        else:
+            raise Exception("Could not extract travel details.")
 
 def travel_agent(user_query,budget,priority):
     details=extract_travel_details(user_query)
@@ -172,7 +190,8 @@ def travel_agent(user_query,budget,priority):
     Important:
     1. Use GetDistance Tool.
     2. Use EstimateTime Tool.
-    3. Use EstimateCost tool.
+    3. Use EstimateCost tool with input format:
+       distance_km,start_date,source,destination,trip_type
     4. Use WebSearch Tool to check:
     - Travel disruptions
     - Event-based surge

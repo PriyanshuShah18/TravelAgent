@@ -198,14 +198,15 @@ def travel_agent(user_query,budget,priority):
     - Event-based surge
     - Weather
     - Strikes
-    5. Adjust recommendation accordingly.
-    6. You MUST strictly use the exact numeric values returned by tools.
-    7. Do NOT manually calculate or assume travel time.
-    8. DO NOT estimate duration from reasoning.
-    9. Use only tool outputs for distance,duration and cost.
-    10. Do NOT mention WebSearch in the final output.
-    11. Choose best option based on tool results.
-    12. Explain clearly.
+    5. Do NOT EXPLICITLY Mention GetDistance,EstimateTime,EstimateCost,WebSearch in the final output.
+    6. Adjust recommendation accordingly.
+    7. You MUST strictly use the exact numeric values returned by tools.
+    8. Do NOT manually calculate or assume travel time.
+    9. DO NOT estimate duration from reasoning.
+    10. Use only tool outputs for distance,duration and cost.
+    11. Always Mention the Distance in the final output.
+    12. Choose best option based on tool results.
+    13. Explain clearly.
     """
     response = agent.run(query)
 

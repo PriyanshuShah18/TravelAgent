@@ -161,16 +161,16 @@ def get_distance(source, destination):
     
     if MAPPLS_API_KEY:
         try:
-            url=f"https://apis.mappls.com/advancedmaps/v1/{MAPPLS_API_KEY}/route"
-    
-            params={
-                "start": f"{src_lat},{src_lon}",
-                "end": f"{dst_lat},{dst_lon}",
-                "profile": "driving",
-                "alternatives":"false"
-            }
+            url=(
+            f"https://route.mappls.com/route/direction/"
+            f"route_adv/driving/"
+            f"{src_lon},{src_lat};{dst_lon},{dst_lat}"
+            f"?access_token={MAPPLS_API_KEY.strip()}"
+            )
 
-            response= requests.get(url,params=params, timeout=10)
+            print("MAPPLS URL:",url)
+
+            response= requests.get(url, timeout=10)
 
             print("Mappls Status:", response.status_code)
             print("Mappls Response:",response.text)

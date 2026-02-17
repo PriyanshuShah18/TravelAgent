@@ -20,7 +20,8 @@ def search_with_serper(query):
     }
 
     payload={
-        "q": query
+        "q": query,
+        "num": 5
     }
 
     response= requests.post(url,json=payload,headers=headers,timeout=10)
@@ -32,9 +33,8 @@ def search_with_serper(query):
 
     snippets =[]
 
-    if "organic" in response:
-        for result in response["organic"][:3]:
-            snippets.append(result.get("snippet",""))
+    for result in response.get("organic",[])[:5]:
+        snippets.append(result.get("snippet",""))
 
     return " ".join(snippets) if snippets else "No relevant results found."
  
@@ -59,23 +59,28 @@ def get_live_fares(source,destination,start_date):
 
     for mode in modes:
         try:
-            query= f"{source} to {destination} {mode} ticket price on {formatted_date} in INR"
+            query= (
+                f"{source} to {destination} {mode} ticket price "
+                f"on {formatted_date} in INR "
+                f"(site:makemytrip.com OR site:yatra.com OR site:cleartrip.com)"
+            )
 
             search_text = search_with_serper(query)
 
             # Extract prices from text
-            price_matches= re.findall(r"(?:₹|Rs\.?|INR)\s?(\d{3,6})",search_text)
+            price_matches= re.findall(r"(?:₹|Rs\.?|INR)\s?([\d,]{3,9})",search_text)
 
             if price_matches:
-                # Take first detected price
-                prices= [int(p) for p in price_matches]
+                cleaned_prices=[]
 
-                # Remove unrealistic prices
-                prices= [p for p in prices if 300 <= p <= 50000]
-
-                if prices:
-                    median_price= int(statistics.median(prices))
+                for p in price_matches:
+                    value= int(p.replace(",",""))
+                    if 300 <= value <= 50000:
+                        cleaned_prices.append(value)
+                if cleaned_prices:
+                    median_price= int(statistics.median(cleaned_prices))
                     fares[mode]= median_price
+
         except Exception:
             continue
     return fares if fares else None

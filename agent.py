@@ -41,6 +41,7 @@ def safe_get_distance(input_text):
     try:
         source,destination= input_text.split(",")
         result= get_distance(source.strip(),destination.strip())
+        print("DEBUG DISTANCE:",result)
         return str(result)
     except Exception as e:
         return f"Distance tool failed.Error: {str(e)}"
@@ -75,11 +76,11 @@ def safe_estimate_cost(input_text):
 
 def safe_estimate_time(input_text):
     """
-    Input format: distance_km,duration_min
+    Input format: distance_km
     """
     try:
-        distance_km,duration_min=map(float,input_text.split(","))
-        result= estimate_time_by_mode(distance_km,duration_min)
+        distance_km=float(input_text.strip())
+        result= estimate_time_by_mode(distance_km,0)
         return str(result)
     except Exception as e:
         return f"Time tool failed. Error: {str(e)}"
@@ -103,7 +104,7 @@ tools=[
     Tool(
         name="EstimateTime",
         func=safe_estimate_time,
-        description="Use this to estimate travel time per mode.Input: distance_km,duration_min"
+        description="Use this to estimate travel time per mode.Input: distance_km"
     ),
     Tool(
         name="WebSearch",
@@ -198,10 +199,13 @@ def travel_agent(user_query,budget,priority):
     - Weather
     - Strikes
     5. Adjust recommendation accordingly.
-    6. Mention the distance between the Source and Destination.
-    7. Do NOT mention WebSearch in the final output.
-    8. Choose best option.
-    9. Explain clearly.
+    6. You MUST strictly use the exact numeric values returned by tools.
+    7. Do NOT manually calculate or assume travel time.
+    8. DO NOT estimate duration from reasoning.
+    9. Use only tool outputs for distance,duration and cost.
+    10. Do NOT mention WebSearch in the final output.
+    11. Choose best option based on tool results.
+    12. Explain clearly.
     """
     response = agent.run(query)
 

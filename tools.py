@@ -3,9 +3,11 @@ from datetime import datetime
 import os
 import re
 import statistics
+from config import get_secret
 
-MAPPLS_API_KEY= os.getenv("MAPPLS_API_KEY")
-SERPER_API_KEY= os.getenv("SERPER_API_KEY")
+
+MAPPLS_API_KEY= get_secret("APPLS_API_KEY")
+SERPER_API_KEY= get_secret("SERPER_API_KEY")
 
 def search_with_serper(query):
     """

@@ -17,17 +17,15 @@ import streamlit as st  # access API key
 import json     # Parse structured LLM output
 import re       # Extract JSON via regex
 
+import os
+from langsmith import Client
 
-from config import get_secret     
-
-from langsmith import Client  # Using langsmith for observability
-
-os.environ["LANGCHAIN_TRACING_V2"]="true"
-os.environ["LANGCHAIN_API_KEY"]= get_secret["LANGCHAIN_API_KEY"]
-os.environ["LANGCHAIN_PROJECT"]= "travel-agent"
+os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
+os.environ["LANGCHAIN_TRACING_V2"]= "true"
+os.environ["LANGCHAIN_PROJECT"]="travel-agent"
 
 
-groq_key=get_secret["GROQ_API_KEY"]
+groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
     model="qwen/qwen3-32b",

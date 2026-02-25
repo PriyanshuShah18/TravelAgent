@@ -20,19 +20,26 @@ import re       # Extract JSON via regex
 import os
 from langsmith import Client
 
-os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
-os.environ["LANGCHAIN_TRACING_V2"]= "true"
-os.environ["LANGCHAIN_PROJECT"]="travel-agent"
+from config import get_secret
+
+LANGCHAIN_API_KEY= get_secret("LANGCHAIN_API_KEY")
+GROQ_API_KEY= get_secret("GROQ_API_KEY")
 
 
-groq_key=st.secrets["GROQ_API_KEY"]
+if LANGCHAIN_API_KEY:
+    os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
+    os.environ["LANGCHAIN_TRACING_V2"]= "true"
+    os.environ["LANGCHAIN_PROJECT"]="travel-agent"
+
+
+#groq_key=st.secrets["GROQ_API_KEY"]
 
 llm= ChatGroq(
     model="qwen/qwen3-32b",
     temperature=0,        # Deterministic Reasoning        
-    groq_api_key=groq_key
+    groq_api_key=GROQ_API_KEY                #groq_key
 )
- 
+
 # The original functions return dictionaries but LangChain tools must return strings
 
 def safe_search(input_text):

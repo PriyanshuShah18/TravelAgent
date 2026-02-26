@@ -315,6 +315,20 @@ def estimate_cost(distance_km,start_date,trip_type="oneway",source=None,destinat
         for mode in live_fares:
             costs[mode]= live_fares[mode]
 
+    # MINIMUM COST SAFETY FLOOR
+
+    MIN_BUS_PER_KM = 1.8
+    MIN_TRAIN_PER_KM = 1.0
+    MIN_FLIGHT_PER_KM = 3.5
+
+    min_bus_cost = distance_km * MIN_BUS_PER_KM
+    min_train_cost = distance_km * MIN_TRAIN_PER_KM
+    min_flight_cost = distance_km * MIN_FLIGHT_PER_KM
+
+    costs["bus"] = max(costs["bus"], round(min_bus_cost))
+    costs["train"] = max(costs["train"],round(min_train_cost))
+    costs["flight"] = max(costs["flight"], round(min_flight_cost))
+    
     if trip_type== "round":
         costs= {mode: price * 2 for mode, price in costs.items()}
     

@@ -2,8 +2,9 @@ import streamlit as st
 import os
 
 # Streamlit Cloud Secrets
-for key,value in st.secrets.items():
-    os.environ[key]=value
+if "STREAMLIT_RUNTIME" in os.environ:
+    for key,value in st.secrets.items():
+        os.environ[key] = value
 
 
 

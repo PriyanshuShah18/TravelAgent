@@ -72,6 +72,7 @@ def load_mcp_tools():
     loop.close()
     return tools
 
+
     #return asyncio.run(mcp_client.get_tools())
 
 
@@ -139,8 +140,6 @@ You are a travel planning assistant.
 
 YOU MUST call get_distance_tool first.
 If you answer without calling it, your answer is invalid.
-
-Always mention routing provider in the final answer.
 
 Rules:
 - Always use tools when numerical data is required.

@@ -66,17 +66,14 @@ mcp_client = MultiServerMCPClient(
 
 @st.cache_resource
 def load_mcp_tools():
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            return loop.run_until_complete(mcp_client.get_tools())
-        else:
-            return asyncio.run(mcp_client.get_tools())
-    except RuntimeError:
-        return asyncio.new_event_loop().run_until_complete(
-            mcp_client.get_tools()
-        )
+    loop = asyncio.new_event_loop()
+    #asyncio.set_event_loop(loop)
+    tools = loop.run_until_complete(mcp_client.get_tools())
+    loop.close()
+    return tools
+
     #return asyncio.run(mcp_client.get_tools())
+
 
 tools = load_mcp_tools()
 
@@ -245,19 +242,31 @@ Important:
 15. Explain clearly.
 """
 
-    response = agent.invoke({
-        "messages": [
-            {"role": "user", "content": query}
-        ]
-    })
+    def run_async(coro):
+        try:
+            return asyncio.run(coro)
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            return loop.run_until_complete(coro)
+      
+        
+    response = run_async(
+        agent.ainvoke({
+            "messages": [
+                {"role": "user","content": query}
+            ]
+        })
+    )
+
+    return response["messages"][-1].content
 
 
-    '''async def _run_agent():
+'''async def _run_agent():
         return await agent.ainvoke({
             "messages": [
             {"role": "user", "content": query}
         ]
     })
     '''
-    return response["messages"][-1].content
+
 

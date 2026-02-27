@@ -11,11 +11,12 @@ import inspect
 if __name__ == "__main__":
     raise Exception("Direct execution of tools.py is blocked.")
 
-print("MAPPLS_API_KEY exists?",bool(MAPPLS_API_KEY))
+
 
 MAPPLS_API_KEY= get_secret("MAPPLS_API_KEY")
 print("MAPPLS_API_KEY:",MAPPLS_API_KEY)
 SERPER_API_KEY= get_secret("SERPER_API_KEY")
+print("MAPPLS_API_KEY exists?",bool(MAPPLS_API_KEY))
 
 
 def search_with_serper(query):

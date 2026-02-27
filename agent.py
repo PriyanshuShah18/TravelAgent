@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq # Groq LLM Wrapper
 #from tools import get_distance,estimate_cost,estimate_time_by_mode,search_with_serper
 
 from langchain.agents import create_agent
-
+import sys
 import os
 from langsmith import Client
 
@@ -57,7 +57,7 @@ mcp_client = MultiServerMCPClient(
             #"url":"http://localhost:8001",
 
             "transport": "stdio",
-            "command": "python",
+            "command": sys.executable,
             "args": [os.path.join(base_dir,"mcp_server.py")],
         }
     }

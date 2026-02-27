@@ -1,6 +1,10 @@
 from mcp.server.fastmcp import FastMCP
 from config import get_secret
 
+import sys
+print("MCP server initiated")
+print("Python version:",sys.version)
+
 from tools import(
     get_distance,
     estimate_cost,

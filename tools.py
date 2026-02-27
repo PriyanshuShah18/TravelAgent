@@ -11,13 +11,10 @@ import inspect
 allowed = "mcp_server.py"
 
 stack = inspect.stack()
-importer_files = [os.path.basename(frame.filename) for frame in stack]
+importer_files = [frame.filename for frame in stack]
 
-if allowed not in importer_files:
-    raise Exception(
-        "Direct access to tools.py is blocked"
-        "Tools must be accessed via MCP server only"
-    )
+if not any(allowed in file for file in importer_files):
+    raise Exception("Direct access to tools.py is blocked")
 
 MAPPLS_API_KEY= get_secret("MAPPLS_API_KEY")
 print("MAPPLS_API_KEY:",MAPPLS_API_KEY)

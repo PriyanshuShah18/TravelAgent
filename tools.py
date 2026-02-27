@@ -6,8 +6,24 @@ import statistics
 from config import get_secret
 
 
+import inspect
+
+allowed = "mcp_server.py"
+
+stack = inspect.stack()
+importer_files = [os.path.basename(frame.filename) for frame in stack]
+
+if allowed not in importer_files:
+    raise Exception(
+        "Direct access to tools.py is blocked"
+        "Tools must be accessed via MCP server only"
+    )
+
 MAPPLS_API_KEY= get_secret("MAPPLS_API_KEY")
+print("MAPPLS_API_KEY:",MAPPLS_API_KEY)
 SERPER_API_KEY= get_secret("SERPER_API_KEY")
+
+
 
 def search_with_serper(query):
     """
@@ -193,7 +209,7 @@ def get_distance(source, destination):
                         "duration_min":route["duration"]/60,
                         "provider":"Mappls"
                     }
-        except Exception as e:
+        except Exception as e:  
             print("Mappls failed,switching to OSRM fallback")
             print(str(e))
     # OSRM Fallback

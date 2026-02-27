@@ -1,5 +1,5 @@
 from langchain_groq import ChatGroq # Groq LLM Wrapper
-from tools import get_distance,estimate_cost,estimate_time_by_mode,search_with_serper
+#from tools import get_distance,estimate_cost,estimate_time_by_mode,search_with_serper
 
 from langchain.agents import create_agent
 from langchain_core.tools import tool
@@ -11,15 +11,22 @@ import re       # Extract JSON via regex
 import os
 from langsmith import Client
 
+
 # Pydantic
 from pydantic import BaseModel
 from typing import Optional
+
+
+import streamlit as st
 
 import logging 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
 )
+
+from langchain_mcp_adapters.client import MultiServerMCPClient
+import asyncio
 
 from config import get_secret
 
@@ -36,7 +43,7 @@ if LANGCHAIN_API_KEY:
 
 
 llm= ChatGroq(
-    model="qwen/qwen3-32b",
+    model="llama-3.3-70b-versatile",
     temperature=0,        # Deterministic Reasoning        
     groq_api_key=GROQ_API_KEY                #groq_key
 )
@@ -46,9 +53,33 @@ llm= ChatGroq(
 
 # DEFINE TOOLS FOR AGENT
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+mcp_client = MultiServerMCPClient(
+    {
+        "travel-agent":{
+            #"transport":"http",
+            #"url":"http://localhost:8001",
+
+            "transport": "stdio",
+            "command": "python",
+            "args": [os.path.join(base_dir,"mcp_server.py")],
+        }
+    }
+)
+
+@st.cache_resource
+def load_mcp_tools():
+    return asyncio.run(mcp_client.get_tools())
+
+tools = load_mcp_tools()
+
+#tools = asyncio.run(mcp_client.get_tools())
+print("LOADED TOOLS:",[t.name for t in tools])
+
 # Description is very important as the LLM reads this desc to decide which tool to call.
 # This is how tool selection works.
-@tool
+'''@tool
 def get_distance_tool(source: str, destination: str) -> dict:
     """
     Get road distance and duration between two cities.
@@ -94,12 +125,19 @@ tools=[
     estimate_cost_tool,
     web_search_tool
 ]
+'''
+llm_with_tools = llm.bind_tools(tools)
 
 agent = create_agent(
-    model=llm,
+    model=llm_with_tools,
     tools=tools,
     system_prompt="""
 You are a travel planning assistant.
+
+YOU MUST call get_distance_tool first.
+If you answer without calling it, your answer is invalid.
+
+Always mention routing provider in the final answer.
 
 Rules:
 - Always use tools when numerical data is required.
@@ -200,10 +238,16 @@ Important:
 14. DO NOT EXPLICITLY MENTION THE USE OF 'TOOL' IN THE OUTPUT.
 15. Explain clearly.
 """
-    response = agent.invoke({
-        "messages": [
+
+    async def _run_agent():
+        return await agent.ainvoke({
+            "messages": [
             {"role": "user", "content": query}
         ]
     })
 
+    response = asyncio.run(_run_agent())
+
     return response["messages"][-1].content
+        
+

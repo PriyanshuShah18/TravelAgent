@@ -17,7 +17,10 @@ def get_distance_tool(source:str,destination:str):
     """
     Return distance and duration between two cities.
     """
+    print("MCP get_distance_tool CALLED")
+    
     return get_distance(source,destination)
+
 
 @mcp.tool()
 def estimate_cost_tool(

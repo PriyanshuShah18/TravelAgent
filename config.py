@@ -1,12 +1,37 @@
 import os 
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
-load_dotenv()
+def get_secret(key: str):
+    try:
+        import streamlit as st
+        if key in st.secrets:
+            return st.secrets[key]
+    except Exception:
+        pass # Not running in streamlit
+
+    return os.getenv(key)
+
+
+'''
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except:
+    pass
 
 def get_secret(key):
-    if key in os.environ:
-        return os.environ.get(key)
-    if key in st.secrets:
-        return st.secrets[key]
-    return None
+    try:
+        import streamlit as st
+        if key in st.secrets:
+            return st.secrets[key]
+
+    except:
+        pass
+
+    return os.getenv(key)
+'''

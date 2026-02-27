@@ -1,9 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from config import get_secret
 
-import sys
-print("MCP server initiated")
-print("Python version:",sys.version)
+
 
 from tools import(
     get_distance,
@@ -11,6 +9,7 @@ from tools import(
     estimate_time_by_mode,
     search_with_serper
 )
+
 
 mcp= FastMCP("travel-agent")
 
@@ -21,8 +20,8 @@ def get_distance_tool(source:str,destination:str):
     """
     Return distance and duration between two cities.
     """
-    print("MCP get_distance_tool CALLED")
-    
+    import sys
+    print(f"Calling get_distance for {source} -> {destination}",file=sys.stderr)
     return get_distance(source,destination)
 
 
@@ -62,6 +61,6 @@ def web_search_tool(query:str):
 # Run MCP Server
 
 if __name__ == "__main__":
-    print("Starting MCP Server...")
+    #print("Starting MCP Server...")
     mcp.run()
 

@@ -6,17 +6,19 @@ import statistics
 from config import get_secret
 
 
+import sys
+
+def debug(msg):
+    print(msg, file=sys.stderr)
+
 import inspect
 
 if __name__ == "__main__":
     raise Exception("Direct execution of tools.py is blocked.")
 
-
-
 MAPPLS_API_KEY= get_secret("MAPPLS_API_KEY")
-print("MAPPLS_API_KEY:",MAPPLS_API_KEY)
+
 SERPER_API_KEY= get_secret("SERPER_API_KEY")
-print("MAPPLS_API_KEY exists?",bool(MAPPLS_API_KEY))
 
 
 def search_with_serper(query):
@@ -128,11 +130,10 @@ def geocode_place(place):
 
                     return lon,lat
         except Exception as e:
-            print("Mappls failed, fallback")
-            print(str(e))
+            debug("Mappls failed, fallback")
+            debug(str(e))
 
-             
-    
+
     # OpenStreetMap Nominatim (FREE)
 
     try:
@@ -185,12 +186,12 @@ def get_distance(source, destination):
             f"?access_token={MAPPLS_API_KEY.strip()}"
             )
 
-            print("MAPPLS URL:",url)
+            debug(f"MAPPLS URL:{url}")
 
             response= requests.get(url, timeout=10)
 
-            print("Mappls Status:", response.status_code)
-            print("Mappls Response:",response.text)
+            debug(f"Status: {response.status_code}")
+            debug(f"Mappls Response:{response.text}")
 
             if response.status_code == 200:
                 data= response.json()
@@ -204,8 +205,8 @@ def get_distance(source, destination):
                         "provider":"Mappls"
                     }
         except Exception as e:  
-            print("Mappls failed,switching to OSRM fallback")
-            print(str(e))
+            debug("Mappls failed,switching to OSRM fallback")
+            debug(str(e))
     # OSRM Fallback
     try:
         url = (

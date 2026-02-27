@@ -63,9 +63,20 @@ mcp_client = MultiServerMCPClient(
     }
 )
 
+
 @st.cache_resource
 def load_mcp_tools():
-    return asyncio.run(mcp_client.get_tools())
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            return loop.run_until_complete(mcp_client.get_tools())
+        else:
+            return asyncio.run(mcp_client.get_tools())
+    except RuntimeError:
+        return asyncio.new_event_loop().run_until_complete(
+            mcp_client.get_tools()
+        )
+    #return asyncio.run(mcp_client.get_tools())
 
 tools = load_mcp_tools()
 

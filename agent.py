@@ -2,12 +2,7 @@ from langchain_groq import ChatGroq # Groq LLM Wrapper
 #from tools import get_distance,estimate_cost,estimate_time_by_mode,search_with_serper
 
 from langchain.agents import create_agent
-from langchain_core.tools import tool
 
-import traceback      # Debugging
-
-import json     # Parse structured LLM output
-import re       # Extract JSON via regex
 import os
 from langsmith import Client
 
@@ -239,15 +234,19 @@ Important:
 15. Explain clearly.
 """
 
-    async def _run_agent():
+    response = agent.invoke({
+        "messages": [
+            {"role": "user", "content": query}
+        ]
+    })
+
+
+    '''async def _run_agent():
         return await agent.ainvoke({
             "messages": [
             {"role": "user", "content": query}
         ]
     })
-
-    response = asyncio.run(_run_agent())
-
+    '''
     return response["messages"][-1].content
-        
 

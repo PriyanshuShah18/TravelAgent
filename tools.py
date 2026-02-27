@@ -8,18 +8,14 @@ from config import get_secret
 
 import inspect
 
-allowed = "mcp_server.py"
+if __name__ == "__main__":
+    raise Exception("Direct execution of tools.py is blocked.")
 
-stack = inspect.stack()
-importer_files = [frame.filename for frame in stack]
-
-if not any(allowed in file for file in importer_files):
-    raise Exception("Direct access to tools.py is blocked")
+print("MAPPLS_API_KEY exists?",bool(MAPPLS_API_KEY))
 
 MAPPLS_API_KEY= get_secret("MAPPLS_API_KEY")
 print("MAPPLS_API_KEY:",MAPPLS_API_KEY)
 SERPER_API_KEY= get_secret("SERPER_API_KEY")
-
 
 
 def search_with_serper(query):

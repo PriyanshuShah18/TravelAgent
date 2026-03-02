@@ -6,14 +6,8 @@ if "STREAMLIT_RUNTIME" in os.environ:
     for key,value in st.secrets.items():
         os.environ[key] = value
 
-
-
-
 from agent import travel_agent
 from datetime import date
-
-
-
 
 st.title("AI Travel Recommendation Agent")
 

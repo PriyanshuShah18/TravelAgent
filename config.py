@@ -16,7 +16,6 @@ def get_secret(key: str):
 
     return os.getenv(key)
 
-
 '''
 try:
     from dotenv import load_dotenv

@@ -5,7 +5,6 @@ import re
 import statistics
 from config import get_secret
 
-
 import sys
 
 def debug(msg):
@@ -17,9 +16,7 @@ if __name__ == "__main__":
     raise Exception("Direct execution of tools.py is blocked.")
 
 MAPPLS_API_KEY= get_secret("MAPPLS_API_KEY")
-
 SERPER_API_KEY= get_secret("SERPER_API_KEY")
-
 
 def search_with_serper(query):
     """
@@ -65,7 +62,6 @@ def get_live_fares(source,destination,start_date):
         formatted_date= datetime.strptime(start_date,"%Y-%m-%d").strftime("%d %B %Y")
     except:
         formatted_date= start_date
-
 
     fares= {}
 
@@ -133,7 +129,6 @@ def geocode_place(place):
             debug("Mappls failed, fallback")
             debug(str(e))
 
-
     # OpenStreetMap Nominatim (FREE)
 
     try:
@@ -161,15 +156,12 @@ def geocode_place(place):
     except Exception as e:
         raise Exception(f"All geocoding providers failed: {str(e)}")
 
-
-
 def get_distance(source, destination):
     """
     Returns real-time distance and duration between two places
     Primary : Mappls
     Fallback: OSRM (Open Source Routing Machine).
     """
-
     # MAPPLS
     try:
         src_lon,src_lat = geocode_place(source)
@@ -200,8 +192,8 @@ def get_distance(source, destination):
                     route = data["routes"][0]
 
                     return{
-                        "distance_km": route["distance"]/1000,
-                        "duration_min":route["duration"]/60,
+                        "distance_km": round(route["distance"]/1000,2),
+                        "duration_min": round(route["duration"]/60,2),
                         "provider":"Mappls"
                     }
         except Exception as e:  
@@ -222,8 +214,8 @@ def get_distance(source, destination):
         route = response["routes"][0]
 
         return {
-            "distance_km": route["distance"] / 1000,
-            "duration_min": route["duration"] / 60,
+            "distance_km": round(route["distance"] / 1000,2),
+            "duration_min": round(route["duration"] / 60,2),
             "provider":"OSRM"
         }
     except Exception as e:
@@ -252,8 +244,6 @@ def estimate_time_by_mode(distance_km,duration_min):
         "train": round(train_time,1),    # Approx 20% faster than bus
         "flight": round(flight_time,1) # Flying speed + airport overhead
     }
-
-
 
 # COST ESTIMATION (BUSINESS LOGIC)
 
@@ -344,8 +334,6 @@ def estimate_cost(distance_km,start_date,trip_type="oneway",source=None,destinat
         costs= {mode: price * 2 for mode, price in costs.items()}
     
     return costs
-
-
 '''
 return {
         "bus": round(distance_km * 1.8,0),

@@ -1,15 +1,12 @@
 from mcp.server.fastmcp import FastMCP
 from config import get_secret
 
-
-
 from tools import(
     get_distance,
     estimate_cost,
     estimate_time_by_mode,
     search_with_serper
 )
-
 
 mcp= FastMCP("travel-agent")
 

@@ -6,11 +6,9 @@ import sys
 import os
 from langsmith import Client
 
-
 # Pydantic
 from pydantic import BaseModel
 from typing import Optional
-
 
 import streamlit as st
 
@@ -43,9 +41,6 @@ llm= ChatGroq(
     groq_api_key=GROQ_API_KEY                #groq_key
 )
 
-
-
-
 # DEFINE TOOLS FOR AGENT
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -63,7 +58,6 @@ mcp_client = MultiServerMCPClient(
     }
 )
 
-
 @st.cache_resource
 def load_mcp_tools():
     loop = asyncio.new_event_loop()
@@ -71,10 +65,7 @@ def load_mcp_tools():
     tools = loop.run_until_complete(mcp_client.get_tools())
     loop.close()
     return tools
-
-
     #return asyncio.run(mcp_client.get_tools())
-
 
 tools = load_mcp_tools()
 
@@ -233,12 +224,12 @@ Important:
 8. Do NOT manually calculate or assume travel time.
 9. DO NOT estimate duration from reasoning.
 10. Use only tool outputs for distance,duration and cost.
-11. If the Budget is Lower than the Cost return Try Searching for Discounts.
-11. Always Mention the Distance in the final output.
-12. Always mention time in Hours.
-13. Choose best option based on tool results.
-14. DO NOT EXPLICITLY MENTION THE USE OF 'TOOL' IN THE OUTPUT.
-15. Explain clearly.
+11. If the Budget is Lower than the Travelling Cost return Try Searching for Discounts, Do not suggest any modes of travel in this case.
+12. Always Mention the Distance in the final output.
+13. Always mention time in Hours.
+14. Choose best option based on tool results.
+15. DO NOT EXPLICITLY MENTION THE USE OF 'TOOL' IN THE OUTPUT.
+16. Explain clearly.
 """
 
     def run_async(coro):
@@ -248,7 +239,6 @@ Important:
             loop = asyncio.new_event_loop()
             return loop.run_until_complete(coro)
       
-        
     response = run_async(
         agent.ainvoke({
             "messages": [

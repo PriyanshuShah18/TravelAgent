@@ -46,6 +46,7 @@ def search_with_serper(query):
 
     for result in response.get("organic",[])[:5]:
         snippets.append(result.get("snippet",""))
+        
 
     return " ".join(snippets) if snippets else "No relevant results found."
  
@@ -334,9 +335,4 @@ def estimate_cost(distance_km,start_date,trip_type="oneway",source=None,destinat
         costs= {mode: price * 2 for mode, price in costs.items()}
     
     return costs
-'''
-return {
-        "bus": round(distance_km * 1.8,0),
-        "train": round(distance_km * 1.5,0),
-        "flight": round(max(3000,distance_km * 4.5),0)}
-'''        
+      

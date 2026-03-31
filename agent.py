@@ -37,8 +37,8 @@ if LANGCHAIN_API_KEY:
 
 llm= ChatGroq(
     model="llama-3.3-70b-versatile",
-    temperature=0,        # Deterministic Reasoning        
-    groq_api_key=GROQ_API_KEY                #groq_key
+    temperature=0,                          # Deterministic Reasoning        
+    groq_api_key=GROQ_API_KEY               # Groq_key
 )
 
 # DEFINE TOOLS FOR AGENT
@@ -72,55 +72,7 @@ tools = load_mcp_tools()
 #tools = asyncio.run(mcp_client.get_tools())
 print("LOADED TOOLS:",[t.name for t in tools])
 
-# Description is very important as the LLM reads this desc to decide which tool to call.
-# This is how tool selection works.
-'''@tool
-def get_distance_tool(source: str, destination: str) -> dict:
-    """
-    Get road distance and duration between two cities.
-    Returns distance_km, duration_min, and provider.
-    """
-    return get_distance(source,destination)
 
-@tool
-def estimate_time_tool(distance_km: float) -> dict:
-    """
-    Estimate travel time in minutes for bus, train, and flight.
-    """
-    return estimate_time_by_mode(distance_km,0)
-
-@tool
-def estimate_cost_tool(
-    distance_km: float,
-    start_date: str,
-    source: str,
-    destination: str,
-    trip_type: str
-) -> dict:
-    """
-    Estimate travel cost for bus, train and flight.
-    """
-    return estimate_cost(
-        distance_km,
-        start_date,
-        trip_type=trip_type,
-        source=source,
-        destination=destination
-    )
-@tool
-def web_search_tool(query: str) -> str:
-    """
-    Search live travel disruptions, weather, or strike information.
-    """
-    return search_with_serper(query)
-
-tools=[
-    get_distance_tool,
-    estimate_time_tool,
-    estimate_cost_tool,
-    web_search_tool
-]
-'''
 llm_with_tools = llm.bind_tools(tools)
 
 agent = create_agent(
@@ -248,14 +200,5 @@ Important:
     )
 
     return response["messages"][-1].content
-
-
-'''async def _run_agent():
-        return await agent.ainvoke({
-            "messages": [
-            {"role": "user", "content": query}
-        ]
-    })
-    '''
 
 

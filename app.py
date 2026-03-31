@@ -3,8 +3,14 @@ import os
 
 # Streamlit Cloud Secrets
 if "STREAMLIT_RUNTIME" in os.environ:
-    for key,value in st.secrets.items():
-        os.environ[key] = value
+    import os.path
+    has_secrets = os.path.exists(".streamlit/secrets.toml") or os.path.exists(os.path.expanduser("~/.streamlit/secrets.toml"))
+    if has_secrets:
+        try:
+            for key,value in st.secrets.items():
+                os.environ[key] = value
+        except Exception:
+            pass
 
 from agent import travel_agent
 from datetime import date

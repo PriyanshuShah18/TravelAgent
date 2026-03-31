@@ -11,7 +11,6 @@ from tools import(
 mcp= FastMCP("travel-agent")
 
 # Register Tools
-
 @mcp.tool()
 def get_distance_tool(source:str,destination:str):
     """
@@ -20,7 +19,6 @@ def get_distance_tool(source:str,destination:str):
     import sys
     print(f"Calling get_distance for {source} -> {destination}",file=sys.stderr)
     return get_distance(source,destination)
-
 
 @mcp.tool()
 def estimate_cost_tool(
@@ -60,4 +58,3 @@ def web_search_tool(query:str):
 if __name__ == "__main__":
     #print("Starting MCP Server...")
     mcp.run()
-
